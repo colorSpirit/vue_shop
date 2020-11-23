@@ -20,7 +20,7 @@
                 </el-form-item>
                 <!-- 按钮区域-->
                 <el-form-item class="btns">
-                    <el-button type="primary">登录</el-button>
+                    <el-button type="primary" @click="validateForm">登录</el-button>
                     <el-button type="info" @click="resetLoginForm">重置</el-button>
                 </el-form-item>
             </el-form>
@@ -54,6 +54,21 @@
             /*调用element-ui中 Form的API实现表单重置*/
             resetLoginForm(){
                 this.$refs.loginForm.resetFields();
+            },
+            /*在登录前，调用element-ui中Form的api实现预验证*/
+            validateForm(){
+                this.$refs.loginForm.validate(async validResult=>{
+                    /* validResult位Boolean类型的值 ,验证成功返回true,验证失败返回false*/
+                    if(validResult){
+                        /*获得响应的结果*/
+                      const {data:res}=  await this.$http.post('login',this.loginForm);
+                      if(res.meta.status!==200){
+                          return  this.$message.error("登录失败");
+                      }
+                    return this.$message.success("登录成功");
+                    }
+                });
+
             }
         }
     }
