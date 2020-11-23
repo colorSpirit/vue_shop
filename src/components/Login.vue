@@ -6,7 +6,7 @@
                 <img src="../assets/logo.png" alt="">
             </div>
             <!-- 登录表单区域-->
-            <el-form :model="loginForm" :rules="loginFormRules" label-width="0" class="login_form">
+            <el-form ref="loginForm" :model="loginForm" :rules="loginFormRules" label-width="0" class="login_form">
                 <!--用户名区域-->
                 <el-form-item prop="username">
                     <el-input placeholder="输入用户名" prefix-icon="iconfont icon-user"
@@ -21,7 +21,7 @@
                 <!-- 按钮区域-->
                 <el-form-item class="btns">
                     <el-button type="primary">登录</el-button>
-                    <el-button type="info">重置</el-button>
+                    <el-button type="info" @click="resetLoginForm">重置</el-button>
                 </el-form-item>
             </el-form>
         </div>
@@ -48,6 +48,12 @@
                         {min: 6, max: 15, message: "长度在6到15个字符之间", trigger: "blur"}
                     ]
                 }
+            }
+        },
+        methods:{
+            /*调用element-ui中 Form的API实现表单重置*/
+            resetLoginForm(){
+                this.$refs.loginForm.resetFields();
             }
         }
     }
