@@ -6,14 +6,17 @@
                 <img src="../assets/logo.png" alt="">
             </div>
             <!-- 登录表单区域-->
-            <el-form label-width="0" class="login_form">
+            <el-form :model="loginForm" :rules="loginFormRules" label-width="0" class="login_form">
                 <!--用户名区域-->
-                <el-form-item>
-                    <el-input placeholder="输入用户名" prefix-icon="iconfont icon-user"></el-input>
+                <el-form-item prop="username">
+                    <el-input placeholder="输入用户名" prefix-icon="iconfont icon-user"
+                              v-model="loginForm.username"></el-input>
                 </el-form-item>
                 <!-- 密码区域-->
-                <el-form-item>
-                    <el-input placeholder="输入密码" prefix-icon="iconfont icon-3702mima"></el-input>
+                <el-form-item prop="password">
+                    <!--验证规则是加给 el-form-item 而不是加给 el-input -->
+                    <el-input placeholder="输入密码" prefix-icon="iconfont icon-3702mima" v-model="loginForm.password"
+                              type="password"></el-input>
                 </el-form-item>
                 <!-- 按钮区域-->
                 <el-form-item class="btns">
@@ -24,9 +27,30 @@
         </div>
     </div>
 </template>
-
 <script>
-    export default {}
+    export default {
+        data() {
+            return {
+                loginForm: {
+                    username: '',
+                    password: ''
+                },
+                /*验证规则对象*/
+                loginFormRules: {
+                    /*验证用户名*/
+                    username: [
+                        {require: true, message: "请输入用户名", trigger: "blur"},
+                        {min: 3, max: 10, message: "长度在3 到 10 个字符之间", trigger: "blur"}
+                    ],
+                    /*验证密码*/
+                    password: [
+                        {require: true, message: "请输入密码", trigger: "blur"},
+                        {min: 6, max: 15, message: "长度在6到15个字符之间", trigger: "blur"}
+                    ]
+                }
+            }
+        }
+    }
 </script>
 
 <style lang="less" scoped>
@@ -70,13 +94,15 @@
         }
 
         /* 设置登录区域的样式 */
-        .login_form{
-            position:absolute;
-            bottom:3px;
-            width:100%;
-            padding:0 5px;
-            box-sizing:border-box;
+
+        .login_form {
+            position: absolute;
+            bottom: 3px;
+            width: 100%;
+            padding: 0 5px;
+            box-sizing: border-box;
             /*设置登录和重置按钮的样式*/
+
             .btns {
                 display: flex;
                 justify-content: flex-end;
