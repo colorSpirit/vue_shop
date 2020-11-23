@@ -140,7 +140,7 @@
         line-height:24px;
         color:#fff;
         letter-spacing:3px;
-        cursor:point;
+        cursor:pointer;
     }
 </style>
 er
