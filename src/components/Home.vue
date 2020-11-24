@@ -20,7 +20,12 @@
                         active-text-color="#409eff"
                         :unique-opened="true"
                         :collapse="isCollapse"
-                        :collapse-transition="false"><!-- :unique-opened='true' 设置只允许展开一个菜单-,collapse设置菜单是否折叠-->
+                        :collapse-transition="false"
+                        :router="true">
+                    <!--
+                    element-ui自带属性，:unique-opened='true' 设置只允许展开一个菜单-,
+                    collapse设置菜单是否折叠,router是否开启路由模式,开启后点击el-menu-item时将通过index值进行跳转，注意是点击el-menu-item而不是el-submenu
+                    -->
                     <!--一级菜单-->
                     <!-- element-ui 通过index属性来确定操作那个菜单 -->
                     <el-submenu :index="index.toString()" v-for="(item,index) in menuList" :key="item.id">
@@ -33,7 +38,7 @@
                         </template>
                         <!--一级菜单的子菜单，二级菜单-->
                         <!-- element-ui 通过index属性来确定操作那个菜单 -->
-                        <el-menu-item :index="index+'-'+subIndex" v-for="(subItem,subIndex) in item.children" :key="subItem.id">
+                        <el-menu-item :index="'/'+subItem.path" v-for="(subItem,subIndex) in item.children" :key="subItem.id">
                             <template slot="title">
                                 <!--二级菜单的图标-->
                                 <i class="el-icon-menu"></i>
@@ -47,7 +52,10 @@
                 </el-menu>
             </el-aside>
             <!--内容主体区-->
-            <el-main>Main</el-main>
+            <el-main>
+                <!--显示Welcome组件-->
+                <router-view></router-view>
+            </el-main>
         </el-container>
     </el-container>
 </template>
@@ -143,4 +151,3 @@
         cursor:pointer;
     }
 </style>
-er

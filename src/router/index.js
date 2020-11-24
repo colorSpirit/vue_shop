@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Login from '../components/Login'
 import Home from '../components/Home'
+import Welcome from '../components/Welcome'
 Vue.use(VueRouter)
 
 const routes = [
@@ -13,9 +14,20 @@ const routes = [
     path:'/login',
     component:Login
   },
+    /*
+    * 注意重定向到同级组件和重定向到子组件的区别，
+    * 重定向到子组件，则该组件仍然会显示，子组件会在该组件中的router-view处显示，如果没有router-view则子组件不会显示
+    * */
   {
     path:'/home',
-    component:Home
+    component:Home,
+    redirect: "/welcome",
+    children:[
+      {
+        path:'/welcome',
+        component:Welcome
+      }
+    ]
   }
 ]
 
