@@ -21,7 +21,8 @@
                         :unique-opened="true"
                         :collapse="isCollapse"
                         :collapse-transition="false"
-                        :router="true">
+                        :router="true"
+                        :default-active="activePath">
                     <!--
                     element-ui自带属性，:unique-opened='true' 设置只允许展开一个菜单-,
                     collapse设置菜单是否折叠,router是否开启路由模式,开启后点击el-menu-item时将通过index值进行跳转，注意是点击el-menu-item而不是el-submenu
@@ -38,7 +39,8 @@
                         </template>
                         <!--一级菜单的子菜单，二级菜单-->
                         <!-- element-ui 通过index属性来确定操作那个菜单 -->
-                        <el-menu-item :index="'/'+subItem.path" v-for="(subItem,subIndex) in item.children" :key="subItem.id">
+                        <el-menu-item :index="'/'+subItem.path" v-for="(subItem,subIndex) in item.children"
+                                      :key="subItem.id" @click="saveNavState('/'+subItem.path)">
                             <template slot="title">
                                 <!--二级菜单的图标-->
                                 <i class="el-icon-menu"></i>
@@ -65,19 +67,23 @@
         data() {
             return {
                 menuList: [],
-                iconObj:{
-                    '125':'iconfont icon-user',
-                    '103':'iconfont icon-tijikongjian',
-                    '101':'iconfont icon-shangpin',
-                    '102':'iconfont icon-danju',
-                    '145':'iconfont icon-baobiao'
+                iconObj: {
+                    '125': 'iconfont icon-user',
+                    '103': 'iconfont icon-tijikongjian',
+                    '101': 'iconfont icon-shangpin',
+                    '102': 'iconfont icon-danju',
+                    '145': 'iconfont icon-baobiao'
                 },
-                isCollapse:false
+                isCollapse: false,
+                /*当前二级菜单*/
+                activePath: ""
             }
         },
         created() {
             /*再模板渲染之前获得数据,以便进行渲染*/
             this.getMenuList();
+            /* 用于刷新后仍然保持当前二级菜单高亮*/
+            this.activePath = window.sessionStorage.getItem("activePath");
         },
         methods: {
             logout() {
@@ -88,13 +94,18 @@
             /*获取所有的菜单*/
             async getMenuList() {
                 /*  别忘使用 await关键字, 在获得后台的数据后再往下执行*/
-                const {data: res} =  await  this.$http.get("menus")
+                const {data: res} = await this.$http.get("menus")
                 if (res.meta.status !== 200) this.$message.error(res.meta.message);
                 this.menuList = res.data;
             },
             /* 点击按钮切换菜单的折叠和展开*/
-            toggleCollapse(){
-                this.isCollapse=!this.isCollapse;
+            toggleCollapse() {
+                this.isCollapse = !this.isCollapse;
+            },
+            /*保持当前选中的二级菜单高亮，哪怕是刷新后仍然会保持高亮*/
+            saveNavState(activePath) {
+                window.sessionStorage.setItem("activePath", activePath)
+                this.activePath = activePath;
             }
         }
 
@@ -130,24 +141,27 @@
 
     .el-aside {
         background-color: #333744;
-        .el-menu{
-            border-right:none;
+
+        .el-menu {
+            border-right: none;
         }
     }
 
     .el-main {
         background-color: #EAEDF1;
     }
-    .iconfont{
-        margin-right:10px;
+
+    .iconfont {
+        margin-right: 10px;
     }
-    .toggle-button{
-        background-color:#4A5064;
-        font-size:10px;
-        text-align:center;
-        line-height:24px;
-        color:#fff;
-        letter-spacing:3px;
-        cursor:pointer;
+
+    .toggle-button {
+        background-color: #4A5064;
+        font-size: 10px;
+        text-align: center;
+        line-height: 24px;
+        color: #fff;
+        letter-spacing: 3px;
+        cursor: pointer;
     }
 </style>
