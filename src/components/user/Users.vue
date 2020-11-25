@@ -121,7 +121,18 @@
         <!--修改用户的对话框-->
         <el-dialog title="修改用户" :visible.sync="editDialogVisible" width="50%">
             <!--主体内容区域-->
-            <span>这是一段信息</span>
+            <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="70px">
+                <el-form-item label="用户名">
+                    <el-input v-model="editForm.username" disabled></el-input>
+                </el-form-item>
+                <el-form-item label="邮箱" prop="email">
+                    <el-input v-model="editForm.email" ></el-input>
+                </el-form-item>
+                <el-form-item label="手机" prop="mobile">
+                    <el-input v-model="editForm.mobile" ></el-input>
+                </el-form-item>
+            </el-form>
+
             <!--页脚局域-->
             <span slot="footer" class="dialog-footer">
                 <el-button @click="editDialogVisible = false">取 消</el-button>
@@ -160,7 +171,31 @@
                 callback("请输入合法的手机号")
             }
             return {
-                editForm:{}, // 查询得到的用户信息对象
+                editFormRules:{
+                    email:[
+                        {
+                            required:true,
+                            message:'请输入邮箱',
+                            trigger:'blur'
+                        },
+                        {
+                            validator:checkEmail,
+                            trigger:'blur'
+                        }
+                    ],
+                    mobile:[
+                        {
+                            required:true,
+                            message:'请输入手机号',
+                            trigger:'blur'
+                        },
+                        {
+                            validator:checkMobile,
+                            trigger:'blur'
+                        }
+                    ]
+                },//编辑用户对话框中使用到的验证规则
+                editForm: {}, // 查询得到的用户信息对象
                 editDialogVisible: false,//控制修改用户的对话框的显示和隐藏
                 addFormRules: {
                     mobile: [
