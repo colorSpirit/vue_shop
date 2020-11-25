@@ -15,12 +15,13 @@
             <el-row :gutter="20">
                 <el-col :span="8">
                     <!-- element-ui 的 el-input 的clearable属性使得该输入框具有可清空的功能-->
-                    <el-input placeholder="请输入内容" class="input-with-select" clearable @clear="getUserList" v-model="queryInfo.query">
+                    <el-input placeholder="请输入内容" class="input-with-select" clearable @clear="getUserList"
+                              v-model="queryInfo.query">
                         <el-button slot="append" icon="el-icon-search" @click="getUserList"></el-button>
                     </el-input>
                 </el-col>
                 <el-col :span="4">
-                    <el-button type="primary">添加用户</el-button>
+                    <el-button type="primary" @click="addDialogVisible=true">添加用户</el-button>
                 </el-col>
             </el-row>
             <!--用户列表区-->
@@ -78,6 +79,25 @@
                 -->
             </el-pagination>
         </el-card>
+        <!--添加用户的对话框-->
+        <!--
+        visible.sync 控制对话框的显示和隐藏，
+        width 对话框的宽度
+        before-close 对话框关闭之前触发该事件
+        -->
+        <el-dialog
+                title="提示"
+                :visible.sync="addDialogVisible"
+                width="50%"
+              >
+            <!-- 内容主体区域 -->
+            <span>这是一段信息</span>
+            <!-- 底部区域-->
+            <span slot="footer" class="dialog-footer">
+                    <el-button @click="addDialogVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="addDialogVisible = false">确 定</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -91,7 +111,8 @@
                     query: '',
                     pagenum: 1,
                     pagesize: 2
-                }
+                },
+                addDialogVisible:false //控制添加用户对话的显示和隐藏
             }
         },
         created() {
