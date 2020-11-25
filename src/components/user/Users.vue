@@ -52,7 +52,8 @@
                         <!--修改按钮-->
                         <el-button type="primary" icon="el-icon-edit" @click="showEditDialog(scope.row.id)"></el-button>
                         <!--删除按钮-->
-                        <el-button type="danger" icon="el-icon-delete"></el-button>
+                        <el-button type="danger" icon="el-icon-delete"
+                                   @click="removeUserById(scope.row.id)"></el-button>
                         <!--分配角色按钮-->
                         <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
                             <el-button type="warning" icon="el-icon-setting"></el-button>
@@ -352,11 +353,33 @@
                     /*关闭对话框*/
                     this.editDialogVisible = false;
                     /*刷新数据列表*/
-                     await this.getUserList();
+                    await this.getUserList();
                     /*提示修改成功*/
                     this.$message.success("成功修改用户信息");
 
                 })
+            },
+            /*当点击删除按钮时，弹出对话框提醒操作者是否删除该用户，并根据操作者的选择进行相应的操作*/
+            async removeUserById(userId) {
+                /*第一个参数 为提示消息，第二个参数为弹出框的标题，第三个参数为配置项*/
+                /*确认删除返回 confirm ，取消删除 返回 cancel*/
+                const confirmResult = await this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+                    confirmButtonText: '确定', //确定按钮的文本
+                    cancelButtonText: '取消',//取消按钮的文本
+                    type: 'warning'//提示文本前面的图标类型
+                }).catch(err=>err);
+                console.log(confirmResult)
+                if(confirmResult ==='cancel'){
+                    this.$message.info("已取消删除");
+                }else{
+                   const {data:res} = await this.$http.delete(`users/${userId}`);
+                   if(res.meta.status !==200){
+                       return this.$message.error("删除用户失败");
+                   }else{
+                       this.$message.success("成功删除用户");
+                        await this.getUserList();
+                   }
+                }
             }
         }
     }
