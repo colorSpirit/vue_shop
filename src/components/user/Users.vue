@@ -14,8 +14,9 @@
             -->
             <el-row :gutter="20">
                 <el-col :span="8">
-                    <el-input placeholder="请输入内容" class="input-with-select">
-                        <el-button slot="append" icon="el-icon-search"></el-button>
+                    <!-- element-ui 的 el-input 的clearable属性使得该输入框具有可清空的功能-->
+                    <el-input placeholder="请输入内容" class="input-with-select" clearable @clear="getUserList" v-model="queryInfo.query">
+                        <el-button slot="append" icon="el-icon-search" @click="getUserList"></el-button>
                     </el-input>
                 </el-col>
                 <el-col :span="4">
@@ -117,7 +118,7 @@
                 this.queryInfo.pagenum = newPage;
                 this.getUserList();
             },
-            /*保存状态的改变*/
+            /*保存状态的改变,通过ajax请求将其同步到后台的数据库中*/
             async userStateChanged(newInfo) {
                 const {data: res} = await this.$http.put(`users/${newInfo.id}/state/${newInfo.mg_state}`);
                 if (res.meta.status !== 200) {
