@@ -26,7 +26,7 @@
             <!--
                 通过le-table渲染用户列表,data接收一个数组对象， username等属性为数组对象中的对象的属性
             -->
-            <el-table :data="userList" style="width: 100%"  stripe border>
+            <el-table :data="userList" style="width: 100%" stripe border>
                 <el-table-column type="index"></el-table-column>
                 <el-table-column prop="username" label="姓名"></el-table-column>
                 <el-table-column prop="email" label="邮箱"></el-table-column>
@@ -38,7 +38,8 @@
                         <el-switch
                                 v-model="scope.row.mg_state"
                                 active-color="#13ce66"
-                                inactive-color="#ff4949">
+                                inactive-color="#ff4949"
+                                @change="userStateChanged(scope.row)">
                         </el-switch>
                     </template>
 
@@ -50,7 +51,7 @@
                         <!--删除按钮-->
                         <el-button type="danger" icon="el-icon-delete"></el-button>
                         <!--分配角色按钮-->
-                        <el-tooltip effect="dark" content="分配角色" placement="top"  :enterable="false">
+                        <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
                             <el-button type="warning" icon="el-icon-setting"></el-button>
                         </el-tooltip>
                     </template>
@@ -83,7 +84,7 @@
     export default {
         data() {
             return {
-                userList:[],// 用户列表
+                userList: [],// 用户列表
                 total: 0,// 总数据条数
                 queryInfo: { // 作为请求参数传给后台， 所以属性名要根据后台API来命名，即属性名不能随意起
                     query: '',
@@ -94,7 +95,7 @@
         },
         created() {
             /* 给data中的变量重新赋值*/
-          this.getUserList();
+            this.getUserList();
         },
         methods: {
             /* 异步请求，注意要用async在获得数据后代码再往下执行*/
@@ -107,15 +108,26 @@
                 this.total = res.data.total;
             },
             /*监听pageSize改变的事件*/
-            handleSizeChange(newSize){
-                    this.queryInfo.pagesize = newSize;
-                    this.getUserList();
+            handleSizeChange(newSize) {
+                this.queryInfo.pagesize = newSize;
+                this.getUserList();
             },
             /*页码值发生改变则会调用该函数*/
-            handleCurrentChange(newPage){
-                 this.queryInfo.pagenum = newPage;
-                 this.getUserList();
+            handleCurrentChange(newPage) {
+                this.queryInfo.pagenum = newPage;
+                this.getUserList();
+            },
+            /*保存状态的改变*/
+            async userStateChanged(newInfo) {
+                const {data: res} = await this.$http.put(`users/${newInfo.id}/state/${newInfo.mg_state}`);
+                if (res.meta.status !== 200) {
+                    newInfo.mg_state = !newInfo.mg_state;
+                    return this.$message.error("更新用户状态失败");
+                }
+                this.$message.success("更新用户状态成功");
+
             }
+
         }
     }
 </script>
