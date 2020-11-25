@@ -119,24 +119,24 @@
             </span>
         </el-dialog>
         <!--修改用户的对话框-->
-        <el-dialog title="修改用户" :visible.sync="editDialogVisible" width="50%">
+        <el-dialog title="修改用户" :visible.sync="editDialogVisible" width="50%" @close="editDialogClosed">
             <!--主体内容区域-->
             <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="70px">
                 <el-form-item label="用户名">
                     <el-input v-model="editForm.username" disabled></el-input>
                 </el-form-item>
                 <el-form-item label="邮箱" prop="email">
-                    <el-input v-model="editForm.email" ></el-input>
+                    <el-input v-model="editForm.email"></el-input>
                 </el-form-item>
                 <el-form-item label="手机" prop="mobile">
-                    <el-input v-model="editForm.mobile" ></el-input>
+                    <el-input v-model="editForm.mobile"></el-input>
                 </el-form-item>
             </el-form>
 
             <!--页脚局域-->
             <span slot="footer" class="dialog-footer">
                 <el-button @click="editDialogVisible = false">取 消</el-button>
-                <el-button type="primary" @click="editDialogVisible = false">确 定</el-button>
+                <el-button type="primary" @click="editUserInfo">确 定</el-button>
              </span>
         </el-dialog>
     </div>
@@ -171,27 +171,27 @@
                 callback("请输入合法的手机号")
             }
             return {
-                editFormRules:{
-                    email:[
+                editFormRules: {
+                    email: [
                         {
-                            required:true,
-                            message:'请输入邮箱',
-                            trigger:'blur'
+                            required: true,
+                            message: '请输入邮箱',
+                            trigger: 'blur'
                         },
                         {
-                            validator:checkEmail,
-                            trigger:'blur'
+                            validator: checkEmail,
+                            trigger: 'blur'
                         }
                     ],
-                    mobile:[
+                    mobile: [
                         {
-                            required:true,
-                            message:'请输入手机号',
-                            trigger:'blur'
+                            required: true,
+                            message: '请输入手机号',
+                            trigger: 'blur'
                         },
                         {
-                            validator:checkMobile,
-                            trigger:'blur'
+                            validator: checkMobile,
+                            trigger: 'blur'
                         }
                     ]
                 },//编辑用户对话框中使用到的验证规则
@@ -326,6 +326,37 @@
                 this.editForm = res.data;
                 this.editDialogVisible = true;
 
+            },
+            /*当修改用户的对话框关闭时调用该方法*/
+            editDialogClosed() {
+                /*重置对话框*/
+                this.$refs.editFormRef.resetFields();
+            },
+            /*在点击修改用户对话框的确定按钮时调用该方法，对参数进行验证并根据验证结果确定是否提交请求*/
+            editUserInfo() {
+                this.$refs.editFormRef.validate(async valid => {
+                    if (!valid) {
+                        return this.$message.error("用户名或邮箱格式错误，修改用户信息失败")
+                    }
+                    /*向后台发送请求更新用户信息*/
+                    const {data: res} = await this.$http.put(`users/${this.editForm.id}`, {
+                        email: this.editForm.email,
+                        mobile: this.editForm.mobile
+                    });
+                    /*判断更新是否成功*/
+                    /*更新失败*/
+                    if (res.meta.status !== 200) {
+                        return this.$message.error("修改用户信息失败");
+                    }
+                    /*更新成功 */
+                    /*关闭对话框*/
+                    this.editDialogVisible = false;
+                    /*刷新数据列表*/
+                     await this.getUserList();
+                    /*提示修改成功*/
+                    this.$message.success("成功修改用户信息");
+
+                })
             }
         }
     }
