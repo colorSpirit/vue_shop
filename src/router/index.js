@@ -5,6 +5,7 @@ import Home from '../components/Home'
 import Welcome from '../components/Welcome'
 import Users from "../components/user/Users"
 import Rights from "../components/power/Rights"
+import Roles from '../components/roles/Roles'
 
 Vue.use(VueRouter)
 
@@ -35,8 +36,12 @@ const routes = [
                 component: Users
             },
             {
-                path:'/rights', // path 路径不要乱写，这个由API接口即点击权限列表时的hash值决定
-                component:Rights
+                path: '/rights', // path 路径不要乱写，这个由API接口即点击权限列表时的hash值决定
+                component: Rights
+            },
+            {
+                path: '/roles',
+                component: Roles
             }
         ]
     }
