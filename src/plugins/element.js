@@ -30,7 +30,8 @@ import {
     Pagination,
     Dialog,
     MessageBox,
-    Tag
+    Tag,
+    Tree
 } from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 
@@ -57,6 +58,7 @@ Vue.use(Tooltip)
 Vue.use(Pagination)
 Vue.use(Dialog)
 Vue.use(Tag)
+Vue.use(Tree)
 /*挂载到Vue原型上，使得每一个Vue实例都可以访问Message的JS方法*/
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm
