@@ -21,7 +21,7 @@
                         <el-row class="vcenter" v-for="(item1,index1) in scope.row.children" :key="index1" :class="['bd-bottom',index1===0?'bd-top':'']">
                             <!--渲染一级权限-->
                             <el-col :span="5">
-                                <el-tag>{{item1.authName}}</el-tag>
+                                <el-tag closable @close="removeRightById(scope.row,item1.id)">{{item1.authName}}</el-tag>
                                 <i class="el-icon-caret-right"></i>
                             </el-col>
                             <!--渲染二级和三级权限 -->
@@ -29,11 +29,13 @@
                                 <!--渲染二级权限-->
                                 <el-row class="vcenter" v-for="(item2,index2) in item1.children" :key="item2.id" :class="[index2===0?'':'bd-top']">
                                     <el-col :span="6">
-                                        <el-tag type="success">{{item2.authName}}</el-tag>
+                                        <el-tag type="success" closable @close="removeRightById(scope.row,item2.id)">{{item2.authName}}</el-tag>
                                         <i class="el-icon-caret-right"></i>
                                     </el-col>
+                                    <!--渲染三级权限-->
                                     <el-col :span="18">
-                                        <el-tag type="warning" v-for="(item3,index3) in item2.children" :key="item3.id">{{item3.authName}}</el-tag>
+                                        <!--closable给每一个三级权限tag上都添加一个 关闭的图标，并且点击该关闭图标时会触发该tag的中自带的close事件 -->
+                                        <el-tag type="warning" v-for="(item3,index3) in item2.children" :key="item3.id" closable @close="removeRightById(scope.row,item3.id)">{{item3.authName}}</el-tag>
                                     </el-col>
 
                                 </el-row>
@@ -77,6 +79,25 @@
                     return this.$message.error("获取角色列表失败")
                 }
                 this.roleList = res.data;
+            },
+            /*当点击 三级权限关闭的图标时会触发该三级权限的tag自带的close事件*/
+           async removeRightById(role,rightId){
+                const result = await this.$confirm('是否删除该权限','删除权限',{
+                    confirmButtonText:'确定',
+                    cancelButtonText:'取消',
+                    type:'warning'
+                }).catch(err=>err)
+               if(result !=='confirm'){
+                   return this.$message.info('取消了删除操作');
+               }
+               const {data:res} = await this.$http.delete(`roles/${role.id}/rights/${rightId}`);
+               if(res.meta.status!==200){
+                   return this.$message.error("未能成功删除权限");
+               }
+              /* await this.getRolesList(); 如果调用该方法则，会重新获取所有角色的权限列表，从而导致页面重新渲染，以至于 打开的 el-expand会合上*/
+              /*将服务器端返回的当前用角色的权限赋值给该角色的children属性即实现了页面上该角色的权限更新又防止了页面的整体刷新，*/
+               role.children=res.data;
+               this.$message.success("成功删除该权限");
             }
         }
     }
