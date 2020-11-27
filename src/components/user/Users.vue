@@ -145,6 +145,7 @@
                 title="分配角色"
                 :visible.sync="setRoleDialogVisible"
                 width="50%"
+                @close="setRoleDialogClosed"
         >
             <div>
                 <p>当前的用户:{{userInfo.username}}</p>
@@ -167,7 +168,7 @@
             </div>
             <span slot="footer" class="dialog-footer">
                  <el-button @click="setRoleDialogVisible = false">取 消</el-button>
-                 <el-button type="primary" @click="setRoleDialogVisible = false">确 定</el-button>
+                 <el-button type="primary" @click="saveRoleInfo">确 定</el-button>
             </span>
         </el-dialog>
     </div>
@@ -297,7 +298,7 @@
                 },
                 addDialogVisible: false, //控制添加用户对话的显示和隐藏
                 /*获取选中的角色的id*/
-                selectRoleId:''
+                selectRoleId: ''
             }
         },
         created() {
@@ -305,6 +306,26 @@
             this.getUserList();
         },
         methods: {
+            /*关闭分配角色的对话框时触发事件，调用该函数*/
+            setRoleDialogClosed() {
+                this.selectRoleId = '';
+                this.userInfo = {};
+            },
+            /*点击分配角色的对话框的确定按钮时保存分配的角色信息,将其同步到后台数据库*/
+            async saveRoleInfo() {
+                if (!this.selectRoleId) {
+                    return this.$message.error("请选择要分配的角色");
+                }
+                const {data: res} = await this.$http.put(`users/${this.userInfo.id}/role`, {
+                    rid: this.selectRoleId
+                });
+                if (res.meta.status !== 200) {
+                    return this.$message.error("更新角色的信息失败");
+                }
+                this.$message.success("更新角色成功");
+                await this.getUserList();
+                this.setRoleDialogVisible = false;
+            },
             /*点击分配角色的按钮时显示分配角色的对话框*/
             async setRole(userInfo) {
                 /*存储当前需要分配权限的角色的信息*/
