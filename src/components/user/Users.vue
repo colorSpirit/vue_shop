@@ -56,7 +56,7 @@
                                    @click="removeUserById(scope.row.id)"></el-button>
                         <!--分配角色按钮-->
                         <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
-                            <el-button type="warning" icon="el-icon-setting"></el-button>
+                            <el-button type="warning" icon="el-icon-setting" @click="setRole(scope.row)"></el-button>
                         </el-tooltip>
                     </template>
                 </el-table-column>
@@ -140,6 +140,36 @@
                 <el-button type="primary" @click="editUserInfo">确 定</el-button>
              </span>
         </el-dialog>
+        <!--分配角色的对话框-->
+        <el-dialog
+                title="分配角色"
+                :visible.sync="setRoleDialogVisible"
+                width="50%"
+        >
+            <div>
+                <p>当前的用户:{{userInfo.username}}</p>
+                <p>当前的角色:{{userInfo.role_name}}</p>
+                <p>分配新角色:
+                    <!--
+                      placeholder 刚展现下拉框时展现的文本
+                    -->
+                    <el-select v-model="selectRoleId" placeholder="请选择">
+                        <!--
+                        label 下拉框中显示的文本
+                        value  选中的文本对应的真实的value
+                        -->
+                        <el-option v-for="item in rolesList"
+                                   :key="item.id"
+                                   :label="item.roleName"
+                                   :value="item.id"></el-option>
+                    </el-select>
+                </p>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                 <el-button @click="setRoleDialogVisible = false">取 消</el-button>
+                 <el-button type="primary" @click="setRoleDialogVisible = false">确 定</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -172,6 +202,12 @@
                 callback("请输入合法的手机号")
             }
             return {
+                /*存储角色列表*/
+                rolesList: [],
+                /*存储当前需要分配角色的用户的信息*/
+                userInfo: {},
+                /*控制分配角色的对话框的显示和隐藏*/
+                setRoleDialogVisible: false,
                 editFormRules: {
                     email: [
                         {
@@ -259,7 +295,9 @@
                     pagenum: 1,
                     pagesize: 2
                 },
-                addDialogVisible: false //控制添加用户对话的显示和隐藏
+                addDialogVisible: false, //控制添加用户对话的显示和隐藏
+                /*获取选中的角色的id*/
+                selectRoleId:''
             }
         },
         created() {
@@ -267,6 +305,18 @@
             this.getUserList();
         },
         methods: {
+            /*点击分配角色的按钮时显示分配角色的对话框*/
+            async setRole(userInfo) {
+                /*存储当前需要分配权限的角色的信息*/
+                this.userInfo = userInfo;
+                /*获取角色列表*/
+                const {data: res} = await this.$http.get("roles");
+                if (res.meta.status !== 200) {
+                    return this.$message.error("未能成功获取角色列表");
+                }
+                this.rolesList = res.data;
+                this.setRoleDialogVisible = true;
+            },
             /* 异步请求，注意要用async在获得数据后代码再往下执行*/
             async getUserList() {
                 const {data: res} = await this.$http.get('users', {params: this.queryInfo});
@@ -367,18 +417,18 @@
                     confirmButtonText: '确定', //确定按钮的文本
                     cancelButtonText: '取消',//取消按钮的文本
                     type: 'warning'//提示文本前面的图标类型
-                }).catch(err=>err);
+                }).catch(err => err);
                 console.log(confirmResult)
-                if(confirmResult ==='cancel'){
+                if (confirmResult === 'cancel') {
                     this.$message.info("已取消删除");
-                }else{
-                   const {data:res} = await this.$http.delete(`users/${userId}`);
-                   if(res.meta.status !==200){
-                       return this.$message.error("删除用户失败");
-                   }else{
-                       this.$message.success("成功删除用户");
+                } else {
+                    const {data: res} = await this.$http.delete(`users/${userId}`);
+                    if (res.meta.status !== 200) {
+                        return this.$message.error("删除用户失败");
+                    } else {
+                        this.$message.success("成功删除用户");
                         await this.getUserList();
-                   }
+                    }
                 }
             }
         }

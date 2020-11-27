@@ -31,7 +31,9 @@ import {
     Dialog,
     MessageBox,
     Tag,
-    Tree
+    Tree,
+    Select,
+    Option
 } from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 
@@ -59,6 +61,8 @@ Vue.use(Pagination)
 Vue.use(Dialog)
 Vue.use(Tag)
 Vue.use(Tree)
+Vue.use(Select)
+Vue.use(Option)
 /*挂载到Vue原型上，使得每一个Vue实例都可以访问Message的JS方法*/
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm
