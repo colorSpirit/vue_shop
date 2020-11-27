@@ -1,0 +1,31 @@
+/*
+    全局样式表
+*/
+
+html,
+body,
+#app {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    min-width:900px;
+}
+
+/*修改面包屑的样式*/
+.el-breadcrumb {
+    margin-bottom: 15px;
+    font-size:12px;
+}
+/*修改卡片视图的样式*/
+.el-card{
+    box-shadow:0 2px 2px rgba(0,0,0,.2) !important;
+}
+
+/*设置用户列表的样式*/
+.el-table{
+    margin-top:15px;
+}
+/*设置pagination的样式*/
+.el-pagination{
+    margin-top:15px;
+}
