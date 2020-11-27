@@ -18,7 +18,7 @@
                 <el-table-column type="expand">
                     <template slot-scope="scope">
                         <!-- 注意此处的布局-->
-                        <el-row v-for="(item1,index1) in scope.row.children" :key="index1" :class="['bd-bottom',index1===0?'bd-top':'']">
+                        <el-row class="vcenter" v-for="(item1,index1) in scope.row.children" :key="index1" :class="['bd-bottom',index1===0?'bd-top':'']">
                             <!--渲染一级权限-->
                             <el-col :span="5">
                                 <el-tag>{{item1.authName}}</el-tag>
@@ -27,7 +27,7 @@
                             <!--渲染二级和三级权限 -->
                             <el-col :span="19">
                                 <!--渲染二级权限-->
-                                <el-row v-for="(item2,index2) in item1.children" :key="item2.id" :class="[index2===0?'':'bd-top']">
+                                <el-row class="vcenter" v-for="(item2,index2) in item1.children" :key="item2.id" :class="[index2===0?'':'bd-top']">
                                     <el-col :span="6">
                                         <el-tag type="success">{{item2.authName}}</el-tag>
                                         <i class="el-icon-caret-right"></i>
@@ -91,5 +91,10 @@
     }
     .bd-bottom{
         border-bottom:1px solid #eee
+    }
+    /*设置纵向对齐*/
+    .vcenter{
+        display:flex;
+       align-items: center;
     }
 </style>
