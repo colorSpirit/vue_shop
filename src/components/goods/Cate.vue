@@ -11,7 +11,7 @@
             <!--添加分类按钮-->
             <el-row>
                 <el-col>
-                    <el-button type="primary">添加分类</el-button>
+                    <el-button type="primary" @click="showAddCateDialog">添加分类</el-button>
                 </el-col>
             </el-row>
             <!--各个类别组成的表格-->
@@ -65,6 +65,42 @@
                     :total="total"
             ></el-pagination>
         </el-card>
+        <!--添加分类 对话框-->
+        <el-dialog title="添加分类" :visible.sync="addCateDialogVisible" width="50%">
+            <!--添加分类的表单-->
+            <el-form :model="addCateForm" :rules="addCateFormRules" ref="addCateFormRef" label-width="100px">
+                <el-form-item label='分类名称:' prop="cat_name">
+                    <el-input v-model="addCateForm.cat_name"></el-input>
+                </el-form-item>
+                <el-form-item label='父级分类'>
+                    <!--级联列表 区域，显示分类层级-->
+                    <!--
+                        expand-trigger 通过鼠标覆盖展现级联列表
+                        options 当前级联组件的数据源
+                        props 当前级联组件的配置项
+                        v-model 来设置选中的id组成的数组，该数组存储那个选项被选中了
+                        change 当选择的项发生变化时，便会调用相应的事件处理函数
+                        clearable 是否支持清空选项
+                        change-on-select  是否可以选中任意的选项，即不仅可以选中二级选项还可以选中一级选项
+                    -->
+                    <el-cascader expand-trigger="hover"
+                                 :options="parentCateList"
+                                 :props="cascaderProps"
+                                 v-model="selectedKeys"
+                                 @change="parentCateChanged"
+                                 clearable
+                                 change-on-select
+                    >
+
+                    </el-cascader>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="addCateDialogVisible=false">取消</el-button>
+               <el-button type='primary' @click="addCateDialogVisible=false">确定</el-button>
+            </span>
+
+        </el-dialog>
     </div>
 </template>
 
@@ -72,6 +108,23 @@
     export default {
         data() {
             return {
+                /*存放父级分类的数据*/
+                parentCateList: [],
+                addCateFormRules: {
+                    cat_name: [
+                        {
+                            required: true,
+                            message: '请输入分类名称',
+                            trigger: 'blur'
+                        }
+                    ]
+                },// 添加分类的表单对应的验证规则
+                addCateForm: {
+                    cat_name: '',//将要添加的分类名称
+                    cat_pid: 0,//父级分类的id
+                    cat_level: 0//分类的等级默认添加的是一级分类
+                },// 添加分类的表单数据对象
+                addCateDialogVisible: false,
                 queryInfo: {
                     type: 3,//请求 1，2，3级分类
                     pagenum: 1,//默认请求第一页的数据
@@ -103,6 +156,13 @@
                         template: 'opt'
                     }
                 ],//tree-table 每列的配置
+                cascaderProps: {
+                    value: 'cat_id',// 实际选中的值，即option的value
+                    label: 'cat_name',//展现的内容，即option中的文本
+                    children: 'children' // 父子节点通过那个属性相互关联
+                },
+                /*存储被选中的选项*/
+                selectedKeys: []
             }
         },
         created() {
@@ -128,13 +188,38 @@
             handleCurrentChange(newPage) {
                 this.queryInfo.pagenum = newPage;
                 this.getCateList();
+            },
+            /*点击展现添加分类对话框*/
+            showAddCateDialog() {
+                this.getParentCateList();
+                this.addCateDialogVisible = true;
+            },
+            /*获取父级分类的数据列表*/
+            async getParentCateList() {
+                const {data: res} = await this.$http.get(`categories`, {
+                    params: {
+                        type: 2 //获取前两级的所有分类
+                    }
+                })
+                if (res.meta.status !== 200) {
+                    return this.$message.error("获取父级分类失败");
+                }
+                this.parentCateList = res.data;
+            },
+            /*当选择的项发生改变时调用该方法 */
+            parentCateChanged() {
+
             }
         }
     }
 </script>
 
 <style scoped>
-.treeTable{
-    margin-top:15px;
-}
+    .treeTable {
+        margin-top: 15px;
+    }
+
+    .el-cascader {
+        width: 100%;
+    }
 </style>
