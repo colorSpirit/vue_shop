@@ -66,7 +66,7 @@
             ></el-pagination>
         </el-card>
         <!--添加分类 对话框-->
-        <el-dialog title="添加分类" :visible.sync="addCateDialogVisible" width="50%">
+        <el-dialog title="添加分类" :visible.sync="addCateDialogVisible" width="50%" @close="addCateDialogClosed">
             <!--添加分类的表单-->
             <el-form :model="addCateForm" :rules="addCateFormRules" ref="addCateFormRef" label-width="100px">
                 <el-form-item label='分类名称:' prop="cat_name">
@@ -97,7 +97,7 @@
             </el-form>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="addCateDialogVisible=false">取消</el-button>
-               <el-button type='primary' @click="addCateDialogVisible=false">确定</el-button>
+               <el-button type='primary' @click="addCate">确定</el-button>
             </span>
 
         </el-dialog>
@@ -208,6 +208,43 @@
             },
             /*当选择的项发生改变时调用该方法 */
             parentCateChanged() {
+                if(this.selectedKeys.length>0){
+                    /*设置当前分类的父分类的id*/
+                    this.addCateForm.cat_pid = this.selectedKeys[this.selectedKeys.length-1];
+                    /*设置当前分类的层级*/
+                    this.addCateForm.cat_level = this.selectedKeys.length;
+
+                }else{
+                    /*设置当前分类的父分类的id*/
+                    this.addCateForm.cat_pid = 0;
+                    /*设置当前分类的层级*/
+                    this.addCateForm.cat_level = this.selectedKeys.length;
+                }
+            },
+            /*点击添加分类对话框的确定按钮时调用该方法*/
+            addCate(){
+              this.$refs.addCateFormRef.validate(async validation=>{
+                    if(!validation){
+                        return this.$message.error("类别信息格式错误");
+                    }
+                    const {data:res} = await this.$http.post('categories',this.addCateForm);
+                    if(res.meta.status!==201){
+                        return this.$message.error("添加类别失败");
+                    }
+                    this.$message.success("添加分类成功");
+                    /*刷新分类列表*/
+                    await this.getCateList();
+                   this.addCateDialogVisible=false
+                });
+
+            },
+            /*添加分类的对话框关闭时调用该事件*/
+            addCateDialogClosed(){
+                /*重置表单以及表单关联的数据*/
+                this.$refs.addCateFormRef.resetFields();
+                this.selectedKeys=[];
+                this.addCateForm.cat_level=0;
+                this.addCateForm.cat_pid=0;
 
             }
         }
