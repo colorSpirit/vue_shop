@@ -39,7 +39,7 @@
                         <!--操作列-->
                         <el-table-column label="操作">
                             <template slot-scope="scope">
-                                <el-button type="primary" class="el-icon-edit">编辑</el-button>
+                                <el-button type="primary" class="el-icon-edit" @click="showEditDialog(scope.row.attr_id)">编辑</el-button>
                                 <el-button type="danger" class="el-icon-delete">删除</el-button>
                             </template>
                         </el-table-column>
@@ -59,7 +59,7 @@
                         <!--操作列-->
                         <el-table-column label="操作">
                             <template slot-scope="scope">
-                                <el-button type="primary" class="el-icon-edit">编辑</el-button>
+                                <el-button type="primary" class="el-icon-edit" @click="showEditDialog(scope.row.attr_id)">编辑</el-button>
                                 <el-button type="danger" class="el-icon-delete">删除</el-button>
                             </template>
                         </el-table-column>
@@ -83,6 +83,25 @@
             <span slot="footer" class="dialog-footer">
                 <el-button @click="addDialogVisible=false">取消</el-button>
                 <el-button type="primary" @click="addParams">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+        <!--修改参数对话框-->
+        <el-dialog
+                :title="titleText"
+                :visible.sync="editDialogVisible"
+                width="50%"
+                @close="editDialogClosed">
+            <el-form :model="editForm"  :rules="editFormRules" ref="editFormRef" label-width="100px">
+                <el-form-item :label="titleText" prop="attr_name">
+                    <el-input v-model="editForm.attr_name"></el-input>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="editDialogVisible=false">取消</el-button>
+                <el-button type="primary" @click="editParams">确定</el-button>
             </span>
 
         </el-dialog>
@@ -119,7 +138,18 @@
                             trigger:'blur'
                         }
                     ]
-                }// 添加参数的验证表单所使用的验证规则
+                },// 添加参数的验证表单所使用的验证规则addDialogVisible: false,
+                editForm:{},//修改参数的验证表单所绑定的数据
+                editDialogVisible: false,
+                editFormRules:{
+                    attr_name:[
+                        {
+                            required:true,
+                            message:'请输入参数名称',
+                            trigger:'blur'
+                        }
+                    ]
+                }// 修改参数的验证表单所使用的验证规则
             };
         },
         created() {
@@ -171,7 +201,6 @@
             },
             /*当添加参数的对话框关闭时调用该方法*/
             addDialogClosed(){
-
                 this.$refs.addFormRef.resetFields();
             },
             /*当点击添加参数的确定按钮时进行相应处理*/
@@ -189,6 +218,43 @@
                     }
                     this.$message.success("添加参数成功");
                     this.addDialogVisible=false;
+                    /*刷新数据*/
+                    await this._getParamsData();
+                })
+            },
+            /*点击编辑按钮展现编辑对话框*/
+            async showEditDialog(id){
+                const {data:res} = await this.$http.get(`categories/${this.cateId}/attributes/${id}`,{
+                    params:{
+                        attr_sel:this.activeName
+                    }
+                });
+                if(res.meta.status!==200){
+                    return this.$message.error("未能成功请求到数据");
+                }
+                /*将数据赋值给表单所绑定的对象*/
+                this.editForm = res.data;
+                this.editDialogVisible=true;
+            },
+            /*当编辑按钮被点击时调用该方法*/
+            editDialogClosed(){
+                this.$refs.editFormRef.resetFields();
+            },
+            /*点击编辑对话框的确定按钮进行相应操作*/
+            editParams(){
+                this.$refs.editFormRef.validate(async validation=>{
+                    if(!validation){
+                        return this.$message.error("参数格式错误");
+                    }
+                    const {data:res} = await this.$http.put(`categories/${this.cateId}/attributes/${this.editForm.attr_id}`,{
+                        attr_name:this.editForm.attr_name,
+                        attr_sel:this.activeName
+                    });
+                    if(res.meta.status!==200){
+                        return this.$message.error("修改参数失败");
+                    }
+                    this.$message.success("修改参数成功");
+                    this.editDialogVisible=false;
                     /*刷新数据*/
                     await this._getParamsData();
                 })
