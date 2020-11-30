@@ -27,14 +27,65 @@
             <el-tabs v-model="activeName" @tab-click="handleTabsClick">
                 <!--添加动态参数的面板-->
                 <el-tab-pane label="动态参数" name="many">
-                    <el-button type="primary" :disabled="isBtnDisabled">添加参数</el-button>
+                    <el-button type="primary" :disabled="isBtnDisabled" @click="addDialogVisible=true">添加参数</el-button>
+                    <!--动态参数表格-->
+                    <el-table :data="manyTableData" border stripe>
+                        <!--展开行-->
+                        <el-table-column type="expand"></el-table-column>
+                        <!--索引列-->
+                        <el-table-column type="index"></el-table-column>
+                        <!--参数名称列-->
+                        <el-table-column label="参数名称" prop="attr_name"></el-table-column>
+                        <!--操作列-->
+                        <el-table-column label="操作">
+                            <template slot-scope="scope">
+                                <el-button type="primary" class="el-icon-edit">编辑</el-button>
+                                <el-button type="danger" class="el-icon-delete">删除</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
                 </el-tab-pane>
                 <!--添加静态属性的面板-->
                 <el-tab-pane label="静态属性" name="only">
-                    <el-button type="primary" :disabled="isBtnDisabled">添加属性</el-button>
+                    <el-button type="primary" :disabled="isBtnDisabled" @click="addDialogVisible=true">添加属性</el-button>
+                    <!--静态属性 表格-->
+                    <el-table :data="onlyTableData" border stripe>
+                        <!--展开行-->
+                        <el-table-column type="expand"></el-table-column>
+                        <!--索引列-->
+                        <el-table-column type="index"></el-table-column>
+                        <!--参数名称列-->
+                        <el-table-column label="参数名称" prop="attr_name"></el-table-column>
+                        <!--操作列-->
+                        <el-table-column label="操作">
+                            <template slot-scope="scope">
+                                <el-button type="primary" class="el-icon-edit">编辑</el-button>
+                                <el-button type="danger" class="el-icon-delete">删除</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
                 </el-tab-pane>
             </el-tabs>
         </el-card>
+
+        <!--添加参数对话框-->
+        <el-dialog
+                :title="titleText"
+                :visible.sync="addDialogVisible"
+                width="50%"
+        @close="addDialogClosed">
+            <el-form :model="addForm"  :rules="addFormRules" ref="addFormRef" label-width="100px">
+                <el-form-item :label="titleText" prop="attr_name">
+                    <el-input v-model="addForm.attr_name"></el-input>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="addDialogVisible=false">取消</el-button>
+                <el-button type="primary" @click="addParams">确定</el-button>
+            </span>
+
+        </el-dialog>
     </div>
 </template>
 
@@ -57,7 +108,18 @@
                 /*存储动态参数的数据*/
                 manyTableData: [],
                 /*存储静态属性的数据*/
-                onlyTableData: []
+                onlyTableData: [],
+                addDialogVisible: false,
+                addForm:{},//添加参数的验证表单所绑定的数据
+                addFormRules:{
+                    attr_name:[
+                        {
+                            required:true,
+                            message:'请输入参数名称',
+                            trigger:'blur'
+                        }
+                    ]
+                }// 添加参数的验证表单所使用的验证规则
             };
         },
         created() {
@@ -106,6 +168,30 @@
                         }
                     }
                 }
+            },
+            /*当添加参数的对话框关闭时调用该方法*/
+            addDialogClosed(){
+
+                this.$refs.addFormRef.resetFields();
+            },
+            /*当点击添加参数的确定按钮时进行相应处理*/
+           addParams(){
+                this.$refs.addFormRef.validate(async validation=>{
+                    if(!validation){
+                        return this.$message.error("参数格式错误");
+                    }
+                    const {data:res} = await this.$http.post(`categories/${this.cateId}/attributes`,{
+                        attr_name:this.addForm.attr_name,
+                        attr_sel:this.activeName
+                    });
+                    if(res.meta.status!==201){
+                        return this.$message.error("添加参数失败");
+                    }
+                    this.$message.success("添加参数成功");
+                    this.addDialogVisible=false;
+                    /*刷新数据*/
+                    await this._getParamsData();
+                })
             }
         },
         computed: {
@@ -120,6 +206,13 @@
                 } else {
                     return null;
                 }
+            },
+            /*返回对话框的标题，动态参数或静态属性*/
+            titleText() {
+                if (this.activeName === 'many') {
+                    return "动态参数";
+                }
+                return "静态属性";
             }
         }
     }
